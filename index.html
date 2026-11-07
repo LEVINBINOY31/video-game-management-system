@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Interactive Entertainment Database – Demo</title>
+<style>
+:root{
+  --bg:#eef1f3;--panel:#fff;--text:#1c262e;--muted:#5b6872;--accent:#3C4C59;--on-accent:#fff;
+  --green:#3f8f5f;--line:#c6cfd6;--field:#fff;--row:#f3f6f8;--sel:#cde6d6;--err:#b3261e;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#12171b;--panel:#1b2228;--text:#e6ebef;--muted:#9aa7b1;--accent:#4c6072;--on-accent:#fff;
+  --green:#5fbf86;--line:#35414b;--field:#222b32;--row:#20282f;--sel:#2d4a3a;--err:#f2a39d}}
+:root[data-theme="dark"]{
+  --bg:#12171b;--panel:#1b2228;--text:#e6ebef;--muted:#9aa7b1;--accent:#4c6072;--on-accent:#fff;
+  --green:#5fbf86;--line:#35414b;--field:#222b32;--row:#20282f;--sel:#2d4a3a;--err:#f2a39d}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.45 "Bahnschrift","Segoe UI",system-ui,sans-serif}
+.title{background:var(--accent);color:var(--on-accent);margin:0;padding:18px 20px;
+  font:600 clamp(18px,3.2vw,30px)/1.2 "OCR A Extended","Courier New",monospace;letter-spacing:.02em}
+.note{margin:0;padding:8px 20px;background:var(--panel);border-bottom:1px solid var(--line);color:var(--muted);font-size:13px}
+main{max-width:1200px;margin:0 auto;padding:14px;display:grid;gap:14px}
+fieldset{margin:0;border:1px solid var(--line);border-radius:6px;background:var(--panel);padding:12px 16px 16px}
+legend{padding:0 8px;font:600 14px "OCR A Extended","Courier New",monospace}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:10px 18px}
+label{display:grid;gap:3px;font-size:13px;color:var(--muted)}
+input,select{font:inherit;color:var(--text);background:var(--field);border:1px solid var(--line);border-radius:4px;padding:6px 8px;min-width:0}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--green);outline-offset:1px}
+.radios{display:flex;gap:16px;align-items:center;height:100%;padding-top:18px}
+.radios label{display:flex;align-items:center;gap:6px;color:var(--text)}
+.bar{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.search{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:12px}
+.search label{display:flex;align-items:center;gap:6px}
+button{font:inherit;background:var(--accent);color:var(--on-accent);border:0;border-radius:4px;padding:7px 14px;cursor:pointer}
+button:hover{background:var(--green)}
+#status{min-height:1.5em;margin:0;font-size:14px}
+#status.err{color:var(--err)}
+.scroll{overflow-x:auto;border:1px solid var(--line);border-radius:4px;max-height:360px;overflow-y:auto}
+table{width:100%;border-collapse:collapse;font-size:14px}
+th{position:sticky;top:0;background:var(--accent);color:var(--on-accent);text-align:left;padding:8px 10px;white-space:nowrap}
+td{padding:7px 10px;border-top:1px solid var(--line);white-space:nowrap}
+tbody tr{cursor:pointer}
+tbody tr:nth-child(even){background:var(--row)}
+tbody tr.sel{background:var(--sel)}
+.empty{padding:18px;color:var(--muted)}
+dialog{border:1px solid var(--line);border-radius:8px;background:var(--panel);color:var(--text);padding:18px;max-width:min(680px,94vw)}
+dialog::backdrop{background:rgba(0,0,0,.45)}
+dialog form{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}
+#chart{width:100%;height:auto;display:block}
+#chart text{fill:var(--text);font-size:12px}
+#chart .col{fill:var(--accent);stroke:var(--text);stroke-width:1.5}
+#chart .axis{stroke:var(--muted)}
+</style>
+</head>
+<body>
+<h1 class="title">INTERACTIVE ENTERTAINMENT DATABASE</h1>
+<p class="note">This is a demo. Records live only in this browser tab and reset on reload; the real app stores them in MySQL.</p>
+
+<main>
+<fieldset>
+  <legend>Input panel</legend>
+  <div class="grid">
+    <label>Game ID<input id="f-id" maxlength="20"></label>
+    <label>Game year<input id="f-year" inputmode="numeric" maxlength="4"></label>
+    <label>Game name<input id="f-name" maxlength="100"></label>
+    <label>Game short ID<input id="f-short" maxlength="20"></label>
+    <label>Steam rating<input id="f-rating" maxlength="30"></label>
+    <label>Exclusive
+      <span class="radios">
+        <label><input type="radio" name="excl" value="YES"> Yes</label>
+        <label><input type="radio" name="excl" value="NO" checked> No</label>
+      </span>
+    </label>
+    <label>Company<input id="f-company" maxlength="100"></label>
+    <label>Platform<input id="f-platform" maxlength="100"></label>
+  </div>
+  <div class="bar">
+    <button id="add">Add record</button>
+    <button id="upd">Update</button>
+    <button id="del">Delete record</button>
+    <button id="clr">Clear</button>
+    <button id="cmp">Compare</button>
+  </div>
+  <p id="status" role="status"></p>
+</fieldset>
+
+<fieldset>
+  <legend>Database panel</legend>
+  <div class="search">
+    <label>Search by
+      <select id="s-col"><option>GAMEID</option><option>GAMENAME</option><option>GAMEYEAR</option><option>COMPANY</option></select>
+    </label>
+    <input id="s-text" placeholder="Search text" aria-label="Search text">
+    <button id="s-go">Search</button>
+    <button id="s-all">Show all</button>
+    <label>Sort by
+      <select id="o-col"><option>GAMEID</option><option>GAMENAME</option><option>RATING</option><option>GAMEYEAR</option><option>COMPANY</option><option>EXCLUSIVE</option></select>
+    </label>
+    <button id="o-asc">Ascending</button>
+    <button id="o-desc">Descending</button>
+  </div>
+  <div class="scroll">
+    <table>
+      <thead><tr><th>Game ID</th><th>Game name</th><th>Year</th><th>Short ID</th><th>Steam rating</th><th>Company</th><th>Exclusive</th><th>Platform</th></tr></thead>
+      <tbody id="rows"></tbody>
+    </table>
+    <div id="none" class="empty" hidden>No records to show.</div>
+  </div>
+</fieldset>
+</main>
+
+<dialog id="confirm"><p id="c-msg"></p>
+  <form method="dialog"><button value="no">Cancel</button><button value="yes">Confirm</button></form>
+</dialog>
+<dialog id="hist"><strong>Number of games released in certain years</strong>
+  <svg id="chart" viewBox="0 0 640 340" role="img" aria-label="Cumulative histogram of release years"></svg>
+  <form method="dialog"><button>Close</button></form>
+</dialog>
+
+<script>
+const $ = id => document.getElementById(id);
+const KEY = {GAMEID:'id',GAMENAME:'name',GAMEYEAR:'year',RATING:'rating',COMPANY:'company',EXCLUSIVE:'excl'};
+let games = [
+  {id:'G001',name:'Hades',year:'2020',short:'HADES',rating:'Overwhelmingly Positive',company:'Supergiant Games',excl:'NO',platform:'PC, Switch, PS4, PS5, Xbox'},
+  {id:'G002',name:'Portal 2',year:'2011',short:'PORT2',rating:'Overwhelmingly Positive',company:'Valve',excl:'NO',platform:'PC, PS3, Xbox 360'},
+  {id:'G003',name:'Elden Ring',year:'2022',short:'ELDEN',rating:'Very Positive',company:'FromSoftware',excl:'NO',platform:'PC, PS4, PS5, Xbox'},
+  {id:'G004',name:'Bloodborne',year:'2015',short:'BLOOD',rating:'N/A',company:'FromSoftware',excl:'YES',platform:'PS4'},
+  {id:'G005',name:'Stardew Valley',year:'2016',short:'STARD',rating:'Overwhelmingly Positive',company:'ConcernedApe',excl:'NO',platform:'PC, Switch, PS4, Xbox, Mobile'},
+  {id:'G006',name:'Celeste',year:'2018',short:'CELES',rating:'Overwhelmingly Positive',company:'Maddy Makes Games',excl:'NO',platform:'PC, Switch, PS4, Xbox'},
+  {id:'G007',name:'Half-Life 2',year:'2004',short:'HL2',rating:'Overwhelmingly Positive',company:'Valve',excl:'NO',platform:'PC, Xbox'},
+  {id:'G008',name:'Hollow Knight',year:'2017',short:'HKNIT',rating:'Overwhelmingly Positive',company:'Team Cherry',excl:'NO',platform:'PC, Switch, PS4, Xbox'}
+];
+let shown = games, selected = null;
+const fields = {id:'f-id',year:'f-year',name:'f-name',short:'f-short',rating:'f-rating',company:'f-company',platform:'f-platform'};
+
+function say(msg, isErr){ const s=$('status'); s.textContent=msg; s.className=isErr?'err':''; }
+function read(){
+  const g={}; for(const k in fields) g[k]=$(fields[k]).value.trim();
+  g.excl=document.querySelector('input[name=excl]:checked').value; return g;
+}
+function fill(g){ for(const k in fields) $(fields[k]).value=g[k]; document.querySelector(`input[name=excl][value=${g.excl}]`).checked=true; }
+function clearForm(){ for(const k in fields) $(fields[k]).value=''; document.querySelector('input[name=excl][value=NO]').checked=true; selected=null; render(shown); }
+function check(g){
+  if(!g.id) return 'Game ID is required.';
+  if(!g.name) return 'Game name is required.';
+  if(g.year && !/^\d{4}$/.test(g.year)) return 'Game year must be a 4-digit year, for example 2015.';
+  return null;
+}
+function render(list){
+  shown=list; const body=$('rows'); body.replaceChildren();
+  for(const g of list){
+    const tr=document.createElement('tr'); if(g.id===selected) tr.className='sel';
+    for(const v of [g.id,g.name,g.year,g.short,g.rating,g.company,g.excl,g.platform]){
+      const td=document.createElement('td'); td.textContent=v; tr.append(td);
+    }
+    tr.onclick=()=>{ selected=g.id; fill(g); render(shown); };
+    body.append(tr);
+  }
+  $('none').hidden = list.length>0;
+}
+function ask(msg){
+  return new Promise(res=>{ const d=$('confirm'); $('c-msg').textContent=msg; d.returnValue='no';
+    d.onclose=()=>res(d.returnValue==='yes'); d.showModal(); });
+}
+function sorted(col, desc){
+  const k=KEY[col], out=[...games];
+  out.sort((a,b)=> k==='year' ? (+a.year||0)-(+b.year||0) : a[k].localeCompare(b[k], undefined, {numeric:true}));
+  return desc ? out.reverse() : out;
+}
+
+$('add').onclick=()=>{
+  const g=read(), err=check(g); if(err) return say(err,true);
+  if(games.some(x=>x.id===g.id)) return say(`A game with ID ${g.id} already exists. Use Update to change it.`,true);
+  games.push(g); render(games); say('Record has been added.');
+};
+$('upd').onclick=async()=>{
+  const g=read(), err=check(g); if(err) return say(err,true);
+  const i=games.findIndex(x=>x.id===g.id); if(i<0) return say(`No game with ID ${g.id} exists.`,true);
+  if(!await ask('Are you sure you want to update this record?')) return;
+  games[i]=g; render(games); say('Record has been updated.');
+};
+$('del').onclick=async()=>{
+  const id=$('f-id').value.trim(); if(!id) return say('Select a record or enter a Game ID first.',true);
+  if(!games.some(x=>x.id===id)) return say(`No game with ID ${id} exists.`,true);
+  if(!await ask(`Delete game ${id}? This cannot be undone.`)) return;
+  games=games.filter(x=>x.id!==id); selected=null; render(games); clearForm(); say('Record has been deleted.');
+};
+$('clr').onclick=()=>{ clearForm(); say(''); };
+$('s-go').onclick=()=>{
+  const k=KEY[$('s-col').value], t=$('s-text').value.trim().toLowerCase();
+  const hit=games.filter(g=>g[k].toLowerCase().includes(t));
+  if(!hit.length) return say('No records matched your search.',true);
+  render(hit); say(`${hit.length} record${hit.length>1?'s':''} found.`);
+};
+$('s-text').onkeydown=e=>{ if(e.key==='Enter') $('s-go').click(); };
+$('s-all').onclick=()=>{ render(games); say(''); };
+$('o-asc').onclick=()=>render(sorted($('o-col').value,false));
+$('o-desc').onclick=()=>render(sorted($('o-col').value,true));
+
+$('cmp').onclick=()=>{
+  const ys=games.map(g=>+g.year).filter(Boolean);
+  if(!ys.length) return say('There are no release years to plot yet.',true);
+  const n=10, min=Math.min(...ys), max=Math.max(...ys), w=(max-min)/n||1, bins=Array(n).fill(0);
+  ys.forEach(y=>bins[Math.min(n-1,Math.floor((y-min)/w))]++);
+  let c=0; const cum=bins.map(b=>c+=b), total=ys.length;
+  const L=48,R=16,T=12,B=40,pw=640-L-R,ph=340-T-B,bw=pw/n, NS='http://www.w3.org/2000/svg';
+  const svg=$('chart'); svg.replaceChildren();
+  const add=(tag,attrs,text)=>{ const e=document.createElementNS(NS,tag); for(const k in attrs) e.setAttribute(k,attrs[k]); if(text!=null) e.textContent=text; svg.append(e); };
+  add('line',{x1:L,y1:T,x2:L,y2:T+ph,class:'axis'}); add('line',{x1:L,y1:T+ph,x2:L+pw,y2:T+ph,class:'axis'});
+  cum.forEach((v,i)=>{ const h=v/total*ph; add('rect',{class:'col',x:L+i*bw,y:T+ph-h,width:bw,height:h}); });
+  [0,.5,1].forEach(f=>add('text',{x:L-6,y:T+ph-f*ph+4,'text-anchor':'end'},Math.round(f*total)));
+  [0,n/2,n].forEach(i=>add('text',{x:L+i*bw,y:T+ph+16,'text-anchor':'middle'},Math.round(min+i*w)));
+  add('text',{x:L+pw/2,y:T+ph+34,'text-anchor':'middle'},'Release year');
+  add('text',{x:12,y:T+ph/2,transform:`rotate(-90 12 ${T+ph/2})`,'text-anchor':'middle'},'Cumulative games');
+  $('hist').showModal();
+};
+render(games);
+</script>
+</body>
+</html>
