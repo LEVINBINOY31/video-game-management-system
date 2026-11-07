@@ -2,7 +2,7 @@
 
 A desktop app for cataloguing video games, built with Python, Tkinter/customtkinter and MySQL.
 
-**[▶ Try the live demo](https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/)** (runs in your browser, no setup)
+**[▶ Try the live demo](https://htmlpreview.github.io/?https://github.com/LEVINBINOY31/video-game-management-system/blob/main/index.html)** (runs in your browser, no setup)
 
 <!-- Add a screenshot: ![Screenshot](docs/screenshot.png) -->
 
