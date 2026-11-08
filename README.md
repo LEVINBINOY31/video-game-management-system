@@ -32,7 +32,7 @@ Each record stores: Game ID, name, release year, short ID, Steam rating, company
 ## Setup
 
 ```bash
-git clone https://github.com/<your-username>/video-game-management-system.git
+git clone https://github.com/LEVINBINOY31/video-game-management-system.git
 cd video-game-management-system
 
 python -m venv .venv
