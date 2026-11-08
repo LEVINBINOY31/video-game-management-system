@@ -16,14 +16,6 @@ A desktop app for cataloguing video games, built with Python, Tkinter/customtkin
 
 Each record stores: Game ID, name, release year, short ID, Steam rating, company, whether it is exclusive, and platform.
 
-## Browser demo
-
-`index.html` is a standalone, in-browser demo of the interface with sample data. It needs no database, and changes reset on reload. To open it:
-
-- **Live link:** enable GitHub Pages (Settings → Pages → deploy from the `main` branch, root folder). The demo is then at `https://YOUR-USERNAME.github.io/YOUR-REPO-NAME/`. Replace `YOUR-USERNAME` and `YOUR-REPO-NAME` in the link at the top of this README with your own.
-- **Without Pages:** open `https://htmlpreview.github.io/?https://github.com/YOUR-USERNAME/YOUR-REPO-NAME/blob/main/index.html`.
-- **Locally:** download the repo and double-click [`index.html`](index.html).
-
 ## Requirements
 
 - Python 3.10+ (with Tkinter)
